@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_assignment/model/model_data.dart';
 import 'package:flutter_assignment/repository/image_repository.dart';
 
 class AppState extends ChangeNotifier {
-  List<dynamic> _list = [];
+  List<InfoModel> _list = [];
 
-  List<dynamic> get list => [..._list];
-List<dynamic> carouselList=[];
-  void updateList(List<dynamic> list) {
+  List<InfoModel> get list => [..._list];
+
+  void updateList(List<InfoModel> list) {
     _list = list;
     notifyListeners();
   }
@@ -15,12 +16,7 @@ List<dynamic> carouselList=[];
     _list.clear();
     notifyListeners();
   }
- void getCarouselList(){
-    for(int i=0;i<=4;i++){
-      carouselList.add(list[i]);
-    }
-    notifyListeners();
-  }
+
 
   bool isLoading = true;
 
@@ -32,10 +28,8 @@ List<dynamic> carouselList=[];
 
   Future<void> getImage(BuildContext context) async {
 
-    List<dynamic> data = await ImageRepository().getImage(context, 20);
-
+    List<InfoModel> data = await ImageRepository().getImage(context);
     _list = data;
-    getCarouselList();
     isLoading=false;
     notifyListeners();
   }

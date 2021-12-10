@@ -1,10 +1,9 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_assignment/common/notification_handler.dart';
-import 'package:flutter_assignment/repository/image_repository.dart';
+
 import 'package:flutter_assignment/state/app_state.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_assignment/ui/auth_page.dart';
+
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,7 +14,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final CarouselController? _controller = CarouselController();
   int currentPos = 0;
 
   @override
@@ -23,14 +21,70 @@ class _HomePageState extends State<HomePage> {
     // TODO: implement initState
     var provider = Provider.of<AppState>(context, listen: false);
     provider.getImage(context);
-    NotificationHandler().getNotification(context);
+
     super.initState();
+  }
+
+  int _selectedIndex = 0;
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const List<Widget> _widgetOptions = <Widget>[
+    Text(
+      'Index 0: Home',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 1: Business',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 2: School',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 3: Settings',
+      style: optionStyle,
+    ),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+            backgroundColor: Colors.white,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timer_sharp),
+            label: 'Appointment',
+            backgroundColor: Colors.white,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'My Account',
+            backgroundColor: Colors.white,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'History',
+            backgroundColor: Colors.white,
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.black,
+        onTap: _onItemTapped,
+      ),
       backgroundColor: Colors.white,
       body: Consumer<AppState>(
         builder: (context, provider, child) {
@@ -46,107 +100,100 @@ class _HomePageState extends State<HomePage> {
                     width: size.width,
                     child: CustomScrollView(
                       slivers: [
-                        const SliverAppBar(
+                        SliverAppBar(
                           elevation: 1,
-                          centerTitle: true,
                           backgroundColor: Colors.white38,
                           automaticallyImplyLeading: false,
-                          pinned: true,
+                          pinned: false,
                           snap: true,
                           floating: true,
-                          title: Text(
-                            "Home Page",
-                            style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: Container(
-                            height: size.height * 0.35,
-                            child: Column(
-                              children: [
-                                CarouselSlider.builder(
-                                  itemCount: provider.carouselList.length,
-                                  options: CarouselOptions(
-                                      autoPlay: true,
-                                      viewportFraction: 0.9,
-                                      pageSnapping: true,
-                                      onPageChanged: (index, reason) {
-                                        setState(() {
-                                          currentPos = index;
-                                        });
-                                      }),
-                                  itemBuilder: (context, index, i) {
-                                    return Container(
-                                      // margin: EdgeInsets.symmetric(horizontal: 5),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(5),
-                                        child: Image.network(
-                                          provider.carouselList[index],
-
-                                          height: size.height*0.3,
-                                          width: size.width*0.8,
-                                          fit: BoxFit.fill,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: provider.carouselList
-                                      .asMap()
-                                      .entries
-                                      .map((entry) {
-                                    return GestureDetector(
-                                      onTap: () =>
-                                          _controller!.animateToPage(entry.key),
-                                      child: Container(
-                                        width: 12.0,
-                                        height: 12.0,
-                                        margin: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 4.0),
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color:
-                                                (Theme.of(context).brightness ==
-                                                            Brightness.dark
-                                                        ? Colors.white
-                                                        : Colors.black)
-                                                    .withOpacity(
-                                                        currentPos == entry.key
-                                                            ? 0.9
-                                                            : 0.4)),
-                                      ),
-                                    );
-                                  }).toList(),
-                                )
-                              ],
-                            ),
+                          actions: [
+                            ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    primary: Colors.white, elevation: 0.0),
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (_) => AuthPage()));
+                                },
+                                child: Row(
+                                  children: const [
+                                    Icon(
+                                      Icons.logout,
+                                      color: Colors.black,
+                                    ),
+                                    Text(
+                                      "Logout",
+                                      style: TextStyle(color: Colors.black),
+                                    )
+                                  ],
+                                ))
+                          ],
+                          title: const Text(
+                            "Planet Web",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                         const SliverToBoxAdapter(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                            child: Text("Find out more.....",style: TextStyle(fontWeight: FontWeight.normal,fontSize: 18),),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            child: Text(
+                              "Book Appointment",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
                           ),
                         ),
-                        SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                                (BuildContext context, int index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-
-                              child: Image.network(
-                                "${provider.list[index]}",
-                                height: size.height*0.3,
-                                width: size.width*0.8,
-                                fit: BoxFit.fill,
+                        SliverGrid(
+                          delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                              child: GridTile(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Image.network(
+                                    "${provider.list[index].image}",
+                                    fit: BoxFit.fill,
+                                    // height: size.height * 0.08,
+                                    errorBuilder: (BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace) {
+                                      return Text('Your error widget...');
+                                    },
+                                  ),
+                                ),
+                                footer: Container(
+                                    decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                            colors: [
+                                          Colors.transparent,
+                                          Colors.black.withOpacity(0.5)
+                                        ],
+                                            begin: Alignment.bottomCenter,
+                                            end: Alignment.topRight)),
+                                    alignment: Alignment.bottomRight,
+                                    padding: EdgeInsets.all(5),
+                                    child: Text(
+                                      "${provider.list[index].name}",
+                                      style: TextStyle(
+                                          fontSize: 20, color: Colors.white),
+                                    )),
                               ),
-                            ),
-                          );
-                        }, childCount: 20)),
+                            );
+                          }, childCount: provider.list.length),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.3,
+                            // crossAxisSpacing: 10,
+                            // mainAxisSpacing: 10,
+                          ),
+                        ),
                       ],
                     ),
                   ),
